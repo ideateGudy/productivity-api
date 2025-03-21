@@ -1,0 +1,22 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "```\r productivity-api/\r │── models/          # Database models\r │── routes/          # API routes\r │── controllers/     # Business logic\r │── middleware/      # Authentication, File Upload\r │── config/          # Database setup\r │── uploads/         # Stores uploaded files\r │── .env             # Environment variables\r │── index.js         # Entry point\r │── package.json     # Project dependencies",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.12.1",
+    "validator": "^13.12.0"
+  }
+}
