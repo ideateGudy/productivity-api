@@ -2,7 +2,6 @@ import express from "express";
 const router = express.Router();
 
 import authMiddleware from "../middlewares/authMiddleware.js";
-import authTaskMiddleware from "../middlewares/authTaskMiddleware.js";
 import tasksController from "../controllers/tasksController.js";
 
 const {
@@ -21,7 +20,7 @@ router.get("/tasks", authMiddleware, getAllTasks);
 router.get("/tasks/:taskId", authMiddleware, getTask);
 
 // Route to create a task
-router.post("/task", authTaskMiddleware, createTask);
+router.post("/task", authMiddleware, createTask);
 
 // Route to update the task
 router.patch("/task/:taskId", authMiddleware, updateTask);

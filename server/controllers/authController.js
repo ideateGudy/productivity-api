@@ -3,9 +3,14 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 const handleErrors = (err) => {
-  // console.log(err.message, err.code, "here-----------------");
+  console.log(err.message, err.code, "here-----------------");
 
   const errors = {};
+
+  if (err.message === "You are not authorized to view this page") {
+    errors.message = "You are not authorized to view this page";
+    errors.statusCode = 401;
+  }
 
   //Check if email is correct(Login)
   if (err.message === "Incorrect Email") {
@@ -198,7 +203,7 @@ const getAllUsers = async (req, res) => {
         message: `No User Found`,
       };
 
-      res.status(404).send(response);
+      return res.status(404).send(response);
     }
 
     const response = {
@@ -211,7 +216,7 @@ const getAllUsers = async (req, res) => {
     res.status(200).send(response);
   } catch (error) {
     const err = handleErrors(error);
-    console.error(error);
+    // console.error("1--------", error);
     const response = {
       status: false,
       message: `Bad Request`,
