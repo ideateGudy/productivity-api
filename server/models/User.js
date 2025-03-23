@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       required: true,
-      default: "user", // Default role is 'user'
+      default: "user", // Default role is "user"
     },
   },
   { timestamps: true }

@@ -37,9 +37,13 @@ const authMiddleware = (req, res, next) => {
         errorMessage = "SyntaxError: Expected ':' after property name in JSON";
       }
 
-      return res
-        .status(statusCode)
-        .json({ status: false, message: errorMessage });
+      const response = {
+        status: false,
+        message: errorMessage,
+        exporyDate: err.expiredAt,
+      };
+
+      return res.status(statusCode).send(response);
     }
 
     // console.log(decodedToken);
@@ -52,6 +56,8 @@ const authMiddleware = (req, res, next) => {
     // console.log(useThis);
 
     req.userId = decodedToken.userId;
+    req.userName = decodedToken.username;
+    // console.log(decodedToken);
 
     // const userIdFromToken = decodedToken.userId;
     const userIdFromParams = req.params.id || req.userId;

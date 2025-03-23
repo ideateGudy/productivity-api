@@ -72,7 +72,7 @@ const createToken = (user) => {
     },
     JWT_SECRET,
     {
-      expiresIn: "30m",
+      expiresIn: "1d",
     }
   );
 };
@@ -94,7 +94,7 @@ const registerUser = async (req, res) => {
       httpOnly: true, // 🔹 Prevents XSS attacks
       // secure: true, // 🔹 Use HTTPS in production
       // sameSite: "Strict", // 🔹 Prevent CSRF attacks
-      maxAge: 30 * 60 * 1000, // 🔹 10 minutes (Same as JWT "10m")
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 🔹  1 day (Same as JWT "1d")
     });
 
     res.status(201).send(response);
@@ -130,7 +130,7 @@ const loginUser = async (req, res) => {
         httpOnly: true, // 🔹 Prevents XSS attacks
         // secure: true, // 🔹 Use HTTPS in production
         // sameSite: "Strict", // 🔹 Prevent CSRF attacks
-        maxAge: 30 * 60 * 1000, // 🔹 30 minutes (Same as JWT "30m")
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 🔹  1 day (Same as JWT "1d")
       });
 
       res.status(200).send(response);
@@ -185,15 +185,6 @@ const logoutUser = async (req, res) => {
 //-------------------------------------
 
 const getAllUsers = async (req, res) => {
-  const userId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    const response = {
-      status: false,
-      message: `Invalid ObjectID`,
-    };
-    return res.status(400).send(response);
-  }
-
   try {
     const users = await User.find();
 

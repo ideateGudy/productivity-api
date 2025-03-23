@@ -10,7 +10,17 @@ const taskSchema = new mongoose.Schema(
       default: "pending",
     },
     attachments: [{ type: String }], //File paths
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    authorizedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    visibility: {
+      type: String,
+      enum: ["private", "public_auth", "public_all"],
+      default: "private",
+    },
   },
   { timestamp: true }
 );
