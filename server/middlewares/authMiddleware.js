@@ -17,11 +17,11 @@ const authMiddleware = (req, res, next) => {
     // console.error("auth-----",err);
     if (err) {
       let errorMessage = "Authentication failed";
-      let statusCode = 400;
+      let code = 400;
 
       if (err.message === "jwt expired") {
         errorMessage = "Token Expired";
-        statusCode = 401;
+        code = 401;
       } else if (err.message === "invalid signature") {
         errorMessage = "Invalid Signature";
       } else if (err.message === "jwt malformed") {
@@ -43,20 +43,12 @@ const authMiddleware = (req, res, next) => {
         exporyDate: err.expiredAt,
       };
 
-      return res.status(statusCode).send(response);
+      return res.status(code).send(response);
     }
-
-    // console.log(decodedToken);
-    // req.userId = decodedToken.userId;
-    // console.log("log", req.userId, decodedToken.userId);
-    // console.log("log1", req.params.id);
-    // console.log("log3", decodedToken.userId);
-
-    // const useThis = req.params.id === undefined ? req.userId : req.params.id;
-    // console.log(useThis);
 
     req.userId = decodedToken.userId;
     req.userName = decodedToken.username;
+    // req.authorizedUsers =
     // console.log(decodedToken);
 
     // const userIdFromToken = decodedToken.userId;

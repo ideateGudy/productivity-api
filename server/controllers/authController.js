@@ -3,56 +3,58 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 const handleErrors = (err) => {
-  console.log(err.message, err.code, "here-----------------");
+  // console.log(err.message, err.code, "here-----------------");
 
   const errors = {};
 
   if (err.message === "You are not authorized to view this page") {
     errors.message = "You are not authorized to view this page";
-    errors.statusCode = 401;
+    errors.code = 401;
   }
 
   //Check if email is correct(Login)
   if (err.message === "Incorrect Email") {
     errors.email = "Email is Incorrect";
-    errors.statusCode = 401;
+    errors.code = 401;
   }
 
   //Check if username is correct(Login)
   if (err.message === "Incorrect Username") {
     errors.username = "Username is Incorrect";
-    errors.statusCode = 401;
+    errors.code = 401;
   }
 
   //if user is not found
   if (err.message === "Invalid Credentials") {
     errors.invalid = "User Not Found";
-    errors.statusCode = 404;
+    errors.code = 404;
   }
 
   //Check if password is correct(Login)
   if (err.message === "Incorrect Password") {
     errors.password = "Password is Incorrect";
-    errors.statusCode = 401;
+    errors.code = 401;
   }
 
   //Check if user exists
   if (err.code === 11000 && err.message.includes("username")) {
     errors.username = "Username Already Exists";
-    errors.statusCode = 409;
+    errors.code = 409;
   }
   //Check if email exists
   if (err.code === 11000 && err.message.includes("email")) {
     errors.email = "Email Already Exists";
-    errors.statusCode = 409;
+    errors.code = 409;
   }
 
   //Validation Errors
   if (err.message.includes("User validation failed")) {
     Object.values(err.errors).forEach(({ properties }) => {
       // console.log("properties---------", properties);
+
       errors[properties.path] = properties.message;
-      errors.statusCode = 400;
+      errors.error = properties.path;
+      errors.code = 400;
     });
   }
 
@@ -107,7 +109,7 @@ const registerUser = async (req, res) => {
       message: `Bad Request`,
       errors: err,
     };
-    res.status(err.statusCode).send(response);
+    res.status(err.code).send(response);
   }
 };
 
@@ -144,7 +146,7 @@ const loginUser = async (req, res) => {
       message: `Bad Request`,
       errors: err,
     };
-    res.status(err.statusCode).send(response);
+    res.status(err.code).send(response);
   }
 };
 
@@ -178,7 +180,7 @@ const logoutUser = async (req, res) => {
       message: `Bad Request`,
       errors: err,
     };
-    res.status(err.statusCode).send(response);
+    res.status(err.code).send(response);
   }
 };
 
@@ -213,7 +215,7 @@ const getAllUsers = async (req, res) => {
       message: `Bad Request`,
       errors: err,
     };
-    res.status(err.statusCode).send(response);
+    res.status(err.code).send(response);
   }
 };
 

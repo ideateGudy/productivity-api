@@ -15,7 +15,7 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    authorizedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    authorizedUsers: [{ type: mongoose.Schema.Types.String, ref: "User" }],
     visibility: {
       type: String,
       enum: ["private", "public_auth", "public_all"],

@@ -15,6 +15,7 @@ const adminAuthMiddleware = (req, res, next) => {
       const response = {
         status: false,
         message: `Access denied: You are not authorized to view this page`,
+        code: 403,
       };
       return res.status(403).send(response);
     }
