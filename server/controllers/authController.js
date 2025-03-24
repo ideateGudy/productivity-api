@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import redisClient from "../redisClient.js";
 
 const handleErrors = (err) => {
   // console.log(err.message, err.code, "here-----------------");
@@ -163,14 +164,33 @@ const logoutUser = async (req, res) => {
   try {
     const user = await User.findById(userId);
 
-    if (user) {
-      const response = {
-        status: true,
-        message: `User Logout Successfull`,
-      };
-      res.cookie("jwt", "", { maxAge: 1 });
-      res.status(200).send(response);
+    if (!user) {
+      res.status(404).json({
+        status: false,
+        message: `User not Found`,
+      });
     }
+
+    if (user.username !== req.userName) {
+      return res.status(403).json({
+        status: false,
+        message: `User ${user.username} is not currently logged in`,
+      });
+    }
+    if (req.tokenExpTime > 0) {
+      await redisClient.set(
+        req.currentActiveToken,
+        "revoked",
+        "EX",
+        req.tokenExpTime
+      ); // Blacklist until token expires
+    }
+    const response = {
+      status: true,
+      message: `User Logout Successfull`,
+    };
+    res.cookie("jwt", "", { maxAge: 1 });
+    res.status(200).send(response);
   } catch (error) {
     const err = handleErrors(error);
     // console.error("Error Registration: ", error);

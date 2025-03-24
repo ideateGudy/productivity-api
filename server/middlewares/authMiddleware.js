@@ -1,10 +1,16 @@
 import jwt from "jsonwebtoken";
+import redisClient from "../redisClient.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   // const token = req.cookies.jwt;
   const token = req.headers.authorization?.split(" ")[1];
+  const isRevoked = await redisClient.get(token);
+  if (isRevoked)
+    return res
+      .status(401)
+      .json({ message: "Token is revoked, please log in again" });
 
   if (!token) {
     return res
@@ -48,6 +54,11 @@ const authMiddleware = (req, res, next) => {
 
     req.userId = decodedToken.userId;
     req.userName = decodedToken.username;
+    req.tokenExpTime = decodedToken.exp - Math.floor(Date.now() / 1000);
+    req.currentActiveToken = token;
+
+    // const expTime = decodedToken.exp - Math.floor(Date.now() / 1000);
+    // console.log("expire:", expTime);
     // req.authorizedUsers =
     // console.log(decodedToken);
 
@@ -59,11 +70,10 @@ const authMiddleware = (req, res, next) => {
       const response = {
         status: false,
         message: `You Are not logged in Yet. Logged in User is: ${decodedToken.username}`,
+        code: 403,
       };
-      // console.log("You Are not logged in Yet");
-      // console.log(token);
 
-      return res.status(401).send(response);
+      return res.status(403).send(response);
       // next();
     } else {
       // console.log(
