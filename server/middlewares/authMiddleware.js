@@ -8,13 +8,15 @@ const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   const isRevoked = await redisClient.get(token);
   if (isRevoked)
-    return res
-      .status(401)
-      .json({ message: "Token is revoked, please log in again" });
+    return res.status(401).json({
+      status: false,
+      message: "Token is revoked, please log in again",
+      code: 401,
+    });
 
   if (!token) {
     return res
-      .status(401)
+      .status(404)
       .json({ status: false, message: "No token provided" });
   }
   //Check if token exists
@@ -27,7 +29,7 @@ const authMiddleware = async (req, res, next) => {
 
       if (err.message === "jwt expired") {
         errorMessage = "Token Expired";
-        code = 401;
+        code = 403;
       } else if (err.message === "invalid signature") {
         errorMessage = "Invalid Signature";
       } else if (err.message === "jwt malformed") {

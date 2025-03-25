@@ -13,10 +13,10 @@ import {
 } from "../controllers/notesController.js";
 
 // Route to create a note for a task
-router.post("/notes", createNote); //Not Started ❌
+router.post("/notes/:taskId", createNote); //Completed ✅
 
 // Route to get a note linked to a specific task
-router.get("/notes/task/:taskId", getNoteByTaskId); //Not Started ❌ -- check authorizedUser Array && visibility ✅
+router.get("/notes/task/:taskId", getNoteByTaskId); //Completed ✅ -- check authorizedUser Array && visibility ✅
 
 // Route to get all notes created by a user
 router.get("/notes/user/:userId", getAllNotesByUser); //Not Started ❌ -- user can only access their own notes ✅

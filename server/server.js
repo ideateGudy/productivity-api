@@ -19,5 +19,5 @@ app.use("/v1/api/auth", authRoutes, authMiddleware, tasksRoutes, notesRoutes);
 app.get("/", (_req, res) => res.send("Hello App"));
 
 app.listen(PORT, () =>
-  console.log(`Server is running on http://localhost:${PORT}`)
+  console.log(`✅ Server is running on http://localhost:${PORT}`)
 );

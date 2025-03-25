@@ -15,6 +15,7 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    note: { type: mongoose.Schema.Types.ObjectId, ref: "Note" },
     authorizedUsers: [{ type: mongoose.Schema.Types.String, ref: "User" }],
     visibility: {
       type: String,

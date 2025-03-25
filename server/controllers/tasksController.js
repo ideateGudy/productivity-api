@@ -120,7 +120,8 @@ const getTask = async (req, res) => {
         const response = {
           status: false,
           currentUser: usernameFromToken,
-          message: `Access Denied: This Task was created by another User: ${task.createdBy.username}`,
+          message: `Access Denied: This Task was created by another User`,
+          creator: task.createdBy.username,
           code: 403,
         };
 
@@ -226,7 +227,8 @@ const updateTask = async (req, res) => {
       const response = {
         status: false,
         currentUser: usernameFromToken,
-        message: `You are not authorized to update this task. This Task was created by another User: ${task.createdBy.username}`,
+        message: `Access Denied: This Task was created by another User`,
+        creator: task.createdBy.username,
       };
 
       return res.status(403).send(response);
@@ -283,6 +285,7 @@ const updateTaskStatus = async (req, res) => {
         status: false,
         currentUser: usernameFromToken,
         message: `You are not authorized to update this task status.`,
+        creator: task.createdBy.username,
       };
 
       return res.status(403).send(response);
@@ -319,9 +322,25 @@ const updateTaskStatus = async (req, res) => {
 const deleteTask = async (req, res) => {
   const { taskId } = req.params;
   const usernameFromToken = req.userName;
+  const userIdFromToken = req.userId;
 
   try {
+    const task = await Task.findById(taskId);
+    const taskUserId = task.createdBy._id.toString();
+
+    // Check if the authenticated userId matches the task creator's userId
+    if (taskUserId !== userIdFromToken) {
+      const response = {
+        status: false,
+        currentUser: usernameFromToken,
+        message: `You are not authorized to delete this task.`,
+        creator: task.createdBy.username,
+        code: 403,
+      };
+      return res.status(403).send(response);
+    }
     await Task.findByIdAndDelete(taskId);
+
     const response = {
       status: true,
       currentUser: usernameFromToken,
