@@ -37,14 +37,14 @@ const handleErrors = (err) => {
 
 const filterFunc = async (res, task, notes) => {
   if (task) {
-    console.log("----- Notes:", notes);
+    // console.log("----- Notes:", notes);
 
     // Filter notes based on taskId
     const filteredNotes = notes.filter(
       (note) => note.taskId.toString() === task._id.toString()
     );
 
-    console.log("Filtered Notes: ", filteredNotes);
+    // console.log("Filtered Notes: ", filteredNotes);
     return res.status(200).json({
       status: true,
       message: "Note retrieved by task ID",
@@ -196,7 +196,7 @@ const getAllNotesByUser = async (req, res) => {
   const usernameFromToken = req.userName;
   console.log(userIdFromToken, userId);
 
-  if (userId === null)
+  if (!userId || userId === null)
     return res
       .status(401)
       .json({ status: false, message: `UserId not specified` });
@@ -228,7 +228,7 @@ const getAllNotesByUser = async (req, res) => {
     res.status(200).json({
       status: true,
       totalNumber: notes.length,
-      message: "Notes retrieved by user",
+      message: `Notes retrieved by ${usernameFromToken}`,
       notes,
     });
   } catch (error) {
@@ -246,24 +246,244 @@ const getAllNotesByUser = async (req, res) => {
 
 // Update a note
 const updateNote = async (req, res) => {
-  res.status(200).json({ message: "Note updated successfully", note: {} });
-};
+  const { noteId } = req.params;
+  const { content, checklist } = req.body;
+  const userIdFromToken = req.userId;
+  const usernameFromToken = req.userName;
+  // console.log(userIdFromToken, userId);
+  if (!noteId)
+    return res
+      .status(401)
+      .json({ status: false, message: `noteId not specified`, code: 401 });
 
-// Delete a note
-const deleteNote = async (req, res) => {
-  res.status(200).json({ message: "Note deleted successfully" });
+  try {
+    const note = await Note.findOne({ _id: noteId })
+      .populate("taskId", "title")
+      .populate("userId", "username");
+
+    if (!note)
+      return res
+        .status(404)
+        .json({ status: false, message: `Note not found`, code: 404 });
+
+    if (userIdFromToken !== note.userId._id.toString())
+      return res.status(403).json({
+        status: false,
+        currentUser: usernameFromToken,
+        message: `Access denied: This note belongs to another user`,
+        code: 403,
+      });
+
+    Object.assign(note, { content, checklist });
+    await note.save();
+    res.status(200).json({
+      status: true,
+      message: "Note updated successfully",
+      code: 200,
+      note,
+    });
+  } catch (error) {
+    // console.error("Error Registration: ", error);
+    const err = handleErrors(error);
+
+    const response = {
+      status: false,
+      message: err.message,
+      code: err.code,
+    };
+    res.status(err.code).send(response);
+  }
 };
 
 // Update checklist item status
 const updateChecklistItem = async (req, res) => {
-  res
-    .status(200)
-    .json({ message: "Checklist item status updated", checklistItem: {} });
+  const { noteId, checklistItemId } = req.params;
+  const { text, status } = req.body;
+  const userIdFromToken = req.userId;
+  const usernameFromToken = req.userName;
+  // console.log(userIdFromToken, userId);
+  if (!noteId)
+    return res
+      .status(401)
+      .json({ status: false, message: `noteId not specified`, code: 401 });
+  if (!checklistItemId)
+    return res.status(401).json({
+      status: false,
+      message: `checklistItemId not specified`,
+      code: 401,
+    });
+
+  try {
+    const note = await Note.findById(noteId);
+
+    if (!note)
+      return res
+        .status(404)
+        .json({ status: false, message: `Not found`, code: 404 });
+
+    if (userIdFromToken !== note.userId._id.toString())
+      return res.status(403).json({
+        status: false,
+        currentUser: usernameFromToken,
+        message: `Access denied: This checklist belongs to another user`,
+        code: 403,
+      });
+
+    // Find the checklist item within the note
+    const checklistItem = note.checklist.find(
+      (item) => item._id.toString() === checklistItemId
+    );
+
+    if (!checklistItem)
+      return res.status(404).json({
+        status: false,
+        message: "Checklist item not found",
+        code: 404,
+      });
+
+    // Update the checklist item properties
+    checklistItem.status = status;
+    checklistItem.text = text;
+
+    // Save the updated note
+    await note.save();
+    res.status(200).json({
+      status: true,
+      message: "Checklist updated successfully",
+      code: 200,
+      note,
+    });
+  } catch (error) {
+    // console.error("Error Registration: ", error);
+    const err = handleErrors(error);
+
+    const response = {
+      status: false,
+      message: err.message,
+      code: err.code,
+    };
+    res.status(err.code).send(response);
+  }
 };
 
 // Delete a checklist item
 const deleteChecklistItem = async (req, res) => {
-  res.status(200).json({ message: "Checklist item deleted successfully" });
+  const { noteId, checklistItemId } = req.params;
+  const userIdFromToken = req.userId;
+  const usernameFromToken = req.userName;
+
+  // Validate request parameters
+  if (!noteId || !checklistItemId)
+    return res.status(400).json({
+      status: false,
+      message: "Missing required fields (noteId, checklistItemId)",
+      code: 400,
+    });
+
+  try {
+    // Find the note and verify user access before updating
+    const note = await Note.findById(noteId);
+
+    if (!note)
+      return res.status(404).json({
+        status: false,
+        message: `Note not found`,
+        code: 404,
+      });
+
+    // Check if the note belongs to the current user
+    if (userIdFromToken !== note.userId.toString())
+      return res.status(403).json({
+        status: false,
+        currentUser: usernameFromToken,
+        message: "Access denied: This checklist belongs to another user",
+        code: 403,
+      });
+
+    // Find the index of the checklist item to remove
+    const checklistIndex = note.checklist.findIndex(
+      (item) => item._id.toString() === checklistItemId
+    );
+
+    if (checklistIndex === -1)
+      return res.status(404).json({
+        status: false,
+        message: "Checklist item not found",
+        code: 404,
+      });
+
+    // Remove the checklist item
+    note.checklist.splice(checklistIndex, 1);
+
+    // Save the updated note
+    await note.save();
+
+    res.status(200).json({
+      status: true,
+      message: "Checklist item deleted successfully",
+      code: 200,
+      updatedNote: note,
+    });
+  } catch (error) {
+    console.error("Error deleting checklist item: ", error);
+    res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
+};
+
+// Delete a note
+const deleteNote = async (req, res) => {
+  const { noteId } = req.params;
+  const userIdFromToken = req.userId;
+  const usernameFromToken = req.userName;
+
+  // Validate request parameter
+  if (!noteId)
+    return res.status(400).json({
+      status: false,
+      message: "Missing required field: noteId",
+      code: 400,
+    });
+
+  try {
+    // Find the note
+    const note = await Note.findById(noteId);
+
+    if (!note)
+      return res.status(404).json({
+        status: false,
+        message: "Note not found",
+        code: 404,
+      });
+
+    // Check if the note belongs to the current user
+    if (userIdFromToken !== note.userId.toString())
+      return res.status(403).json({
+        status: false,
+        currentUser: usernameFromToken,
+        message: "Access denied: This note belongs to another user",
+        code: 403,
+      });
+
+    // Delete the note
+    await Note.findByIdAndDelete(noteId);
+
+    res.status(200).json({
+      status: true,
+      message: "Note deleted successfully",
+      code: 200,
+    });
+  } catch (error) {
+    console.error("Error deleting note: ", error);
+    res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
 };
 
 // Export all functions

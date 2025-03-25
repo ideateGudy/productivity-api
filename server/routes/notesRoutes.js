@@ -19,17 +19,17 @@ router.post("/notes/:taskId", createNote); //Completed ✅
 router.get("/notes/task/:taskId", getNoteByTaskId); //Completed ✅ -- check authorizedUser Array && visibility ✅
 
 // Route to get all notes created by a user
-router.get("/notes/user/:userId", getAllNotesByUser); //Not Started ❌ -- user can only access their own notes ✅
+router.get("/notes/user/:userId", getAllNotesByUser); //Completed ✅ -- user can only access their own notes ✅
 
 // Route to update a note's content
-router.patch("/notes/:noteId", updateNote); //Not Started ❌ -- only note creator can update ✅
+router.patch("/notes/:noteId", updateNote); //Completed ✅ -- only note creator can update ✅
 
 // Route to update the status of a checklist item
 router.patch(
   "/notes/:noteId/checklist/:checklistItemId",
 
   updateChecklistItem
-); //Not Started ❌
+); //Completed ✅
 
 // Route to mark all checklist items as completed
 // router.patch("/notes/:noteId/complete",  markChecklistComplete); //Not Started ❌
