@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup - Productivity App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-100">
+
+    <div class="bg-white p-6 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+        <input type="email" id="email" placeholder="Email" class="w-full p-3 border mb-4 rounded">
+        <input type="password" id="password" placeholder="Password" class="w-full p-3 border mb-4 rounded">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" class="w-full p-3 border mb-4 rounded">
+        <button id="signupBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600">
+            Sign Up
+        </button>
+        <p class="text-center mt-4">Already have an account? <a href="login.html" class="text-blue-500">Login</a></p>
+    </div>
+
+
+    
+    <script>
+        document.getElementById("signupBtn").addEventListener("click", () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+            if (!email || !password || !confirmPassword) {
+                alert("All fields are required!");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            if (localStorage.getItem(email)) {
+                alert("An account with this email already exists!");
+                return;
+            }
+
+            localStorage.setItem(email, JSON.stringify({ password, tasks: [] })); // Store empty task list for the user
+            alert("Signup successful! You can now log in.");
+            window.location.href = "login.html";
+        });
+    </script>
+
+</body>
+</html>
