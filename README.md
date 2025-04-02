@@ -1,180 +1,114 @@
-# Task and Note Management Flow
+Task Management API
 
-This document outlines the flow for creating tasks, notes, and managing checklist items, including their statuses ("pending", "in-progress", or "completed"). It also includes the backend endpoints for each step in the flow.
+Overview
 
----
+This is a RESTful API for a task management system that allows users to manage tasks, notes, and authentication. The API supports user authentication, task visibility management, authorization controls, and note management.
 
-### Flow:
+Features
 
-#### 1. **User Creates a Task:**
+User authentication (Register, Login, Logout)
 
-- A user creates a task with a **title**, **description**, and **optional attachments**. The task is saved with a unique **task ID**.
+Task management (Create, Read, Update, Delete)
 
-**Endpoint:**
+Task visibility and authorization
 
-- `POST /api/tasks`
+Notes and checklist management
 
-**Request Body:**
+Role-based access control with admin and user roles
 
-```json
-{
-  "title": "Complete API Documentation",
-  "description": "Write API documentation for the project",
-  "userId": "user_id", // Reference to the user
-  "attachments": [] // Optional
-}
-```
 
-{
-"taskId": "unique_task_id",
-"status": "pending"
-} 2. User Creates a Note with a Checklist:
-A user creates a note linked to a task. The note contains a checklist with items, each with a status ("pending", "in-progress", or "completed").
-Endpoint:
+Technologies Used
 
-POST /api/notes
-Request Body:
+Node.js
 
-json
-Copy
-Edit
-{
-"content": "This is a note with a checklist",
-"taskId": "task_id", // Reference to the task
-"userId": "user_id", // Reference to the user
-"checklist": [
-{ "text": "Complete task description", "status": "pending" },
-{ "text": "Update task status", "status": "in-progress" },
-{ "text": "Review attachments", "status": "completed" }
-]
-} 3. User Views Task with Notes:
-A user views a task and its associated notes, including the checklist items with their current statuses.
-Endpoint:
+Express.js
 
-GET /api/tasks/:taskId
-Response:
+JWT Authentication
 
-json
-Copy
-Edit
-{
-"taskId": "task_id",
-"title": "Complete API Documentation",
-"description": "Write API documentation for the project",
-"status": "pending",
-"notes": [
-{
-"noteId": "note_id",
-"content": "This is a note with a checklist",
-"checklist": [
-{ "text": "Complete task description", "status": "pending" },
-{ "text": "Update task status", "status": "in-progress" },
-{ "text": "Review attachments", "status": "completed" }
-]
-}
-]
-} 4. User Updates Checklist Item Status:
-The user can update the status of individual checklist items (e.g., from "pending" to "completed").
-Endpoint:
+Redis (Token revocation)
 
-PATCH /api/notes/:noteId/checklist/:checklistItemId
-Request Body:
+MongoDB (Database)
 
-json
-Copy
-Edit
-{
-"status": "completed"
-}
-Response:
 
-json
-Copy
-Edit
-{
-"status": "success",
-"updatedChecklistItem": {
-"text": "Complete task description",
-"status": "completed"
-}
-} 5. User Views Updated Task with Notes and Checklist:
-Once the status of checklist items is updated, the user can view the task and updated checklist items with their new statuses.
-Endpoint:
+Installation
 
-GET /api/tasks/:taskId
-Response:
+1. Clone the repository:
 
-json
-Copy
-Edit
-{
-"taskId": "task_id",
-"title": "Complete API Documentation",
-"description": "Write API documentation for the project",
-"status": "in-progress",
-"notes": [
-{
-"noteId": "note_id",
-"content": "This is a note with a checklist",
-"checklist": [
-{ "text": "Complete task description", "status": "completed" },
-{ "text": "Update task status", "status": "in-progress" },
-{ "text": "Review attachments", "status": "completed" }
-]
-}
-]
-} 6. User Filters Notes by Checklist Status:
-Users can filter notes based on checklist item statuses (e.g., show only "completed" items).
-Endpoint:
+git clone https://github.com/yourusername/task-management-api.git
+cd task-management-api
 
-GET /api/notes?status=completed
-Response:
 
-json
-Copy
-Edit
-[
-{
-"noteId": "note_id",
-"content": "This is a note with a checklist",
-"checklist": [
-{ "text": "Complete task description", "status": "completed" }
-]
-}
-] 7. User Marks All Checklist Items as Completed:
-A user can mark all checklist items in a note as "completed".
-Endpoint:
+2. Install dependencies:
 
-PATCH /api/notes/:noteId/complete
-Response:
+npm install
 
-json
-Copy
-Edit
-{
-"status": "success",
-"message": "All checklist items marked as completed."
-} 8. User Deletes a Checklist Item:
-If a checklist item is no longer needed, the user can delete it.
-Endpoint:
 
-DELETE /api/notes/:noteId/checklist/:checklistItemId
-Response:
+3. Set up environment variables in a .env file:
 
-json
-Copy
-Edit
-{
-"status": "success",
-"message": "Checklist item deleted."
-}
+JWT_SECRET=your_secret_key
+REDIS_URL=your_redis_connection
 
-Summary of Flow:
-Create Task: A user creates a task with a title, description, and status.
-Create Note with Checklist: A user adds a note with a checklist linked to a task. Each checklist item has a status that can be "pending", "in-progress", or "completed".
-View Notes: The user views the task and its notes, including the checklist items and their status.
-Update Checklist Status: The user can update the status of individual checklist items.
-Filter by Status: The user can filter and search for checklist items based on their status (e.g., show only "completed" items).
-Complete Checklist: The user can mark all checklist items as completed when the task is finished.
-Delete Checklist Item: The user can delete individual checklist items if no longer needed.
-This flow allows a user to create tasks and manage notes with checklist items, updating and filtering their status as needed.
+
+4. Start the server:
+
+npm start
+
+
+
+API Endpoints
+
+## API Endpoints
+
+### Authentication  
+| Method | Endpoint     | Description            |
+|--------|-------------|------------------------|
+| POST   | /register   | Register a new user   |
+| POST   | /login      | User login            |
+| POST   | /logout/:id | Logout user           |
+
+### User Management (Admin Only)  
+| Method | Endpoint  | Description       |
+|--------|----------|-------------------|
+| GET    | /users   | Get all users     |
+
+### Task Management  
+| Method | Endpoint                     | Description                                |
+|--------|-----------------------------|--------------------------------------------|
+| GET    | /tasks                      | Get all tasks                             |
+| GET    | /tasks/:taskId              | Get a specific task                       |
+| POST   | /tasks                      | Create a new task                         |
+| PATCH  | /tasks/:taskId              | Update a task                             |
+| PATCH  | /tasks/:taskId/status       | Update task status                        |
+| DELETE | /tasks/:taskId              | Delete a task                             |
+
+### Task Authorization & Visibility  
+| Method | Endpoint                        | Description                                  |
+|--------|----------------------------------|----------------------------------------------|
+| PATCH  | /tasks/:taskId/authorize        | Authorize a user to access a task           |
+| PATCH  | /tasks/:taskId/revoke           | Revoke a user's access to a task            |
+| PATCH  | /tasks/:taskId/visibility       | Set task visibility (private, public_auth, public_all) |
+
+### Notes Management  
+| Method | Endpoint                               | Description                              |
+|--------|---------------------------------------|------------------------------------------|
+| POST   | /notes/:taskId                       | Create a note for a task                |
+| GET    | /notes/task/:taskId                  | Get notes for a specific task           |
+| GET    | /notes/user/:userId                  | Get all notes created by a user         |
+| PATCH  | /notes/:noteId                       | Update a note                           |
+| PATCH  | /notes/:noteId/checklist/:checklistItemId | Update checklist item status      |
+| DELETE | /notes/:noteId/checklist/:checklistItemId | Delete a checklist item            |
+| DELETE | /notes/:noteId                       | Delete a note                           |
+
+Authentication Middleware
+
+The API uses JWT authentication with middleware for verifying tokens and handling user authorization. Revoked tokens are stored in Redis for session invalidation.
+
+Contribution
+
+Feel free to contribute to this project by creating issues or submitting pull requests.
+
+License
+
+This project is licensed under the MIT License.
+
+ 
