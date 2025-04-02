@@ -103,11 +103,116 @@ Authentication Middleware
 
 The API uses JWT authentication with middleware for verifying tokens and handling user authorization. Revoked tokens are stored in Redis for session invalidation.
 
-Contribution
+
+## Flow of Actions
+This API allows users to register, log in, manage tasks, and collaborate on tasks by granting or revoking access.
+
+
+1. User Registration
+
+User sends a request to /register with their details.
+
+API creates a new user and stores credentials securely.
+
+
+
+2. User Login
+
+User sends credentials to /login.
+
+API verifies credentials and issues a JWT token.
+
+Token is stored in the client for authentication.
+
+
+
+3. User Logout
+
+User sends a request to /logout/:id with their token.
+
+API revokes the token, preventing further access.
+
+
+
+4. Retrieve All Users (Admin Only)
+
+Admin sends a request to /users.
+
+API verifies admin role and returns the list of users.
+
+
+
+5. Task Management
+
+User creates a task by sending data to /tasks.
+
+Task is stored with user as owner.
+
+User retrieves all tasks with /tasks.
+
+User retrieves a specific task with /tasks/:taskId.
+
+User updates a task with /tasks/:taskId.
+
+User updates task status with /tasks/:taskId/status.
+
+User deletes a task with /tasks/:taskId.
+
+
+
+6. Task Permissions
+
+Task owner grants another user access with /tasks/:taskId/authorize.
+
+Task owner revokes user access with /tasks/:taskId/revoke.
+
+Task owner updates task visibility (private, public_auth, public_all) via /tasks/:taskId/visibility.
+
+
+
+7. Notes Management
+
+User creates a note for a task with /notes/:taskId.
+
+User retrieves notes for a task via /notes/task/:taskId.
+
+User retrieves all notes they created via /notes/user/:userId.
+
+User updates a note with /notes/:noteId.
+
+User updates a checklist item in a note via /notes/:noteId/checklist/:checklistItemId.
+
+User deletes a checklist item via /notes/:noteId/checklist/:checklistItemId.
+
+User deletes a note with /notes/:noteId.
+
+
+
+
+### Authentication & Authorization
+
+JWT-based authentication ensures only authorized users access protected routes.
+
+Admins have additional privileges such as viewing all users.
+
+Task owners control task permissions and visibility settings.
+
+
+### Error Handling
+
+Missing or invalid tokens return authentication errors.
+
+Unauthorized access to tasks and notes returns appropriate error messages.
+
+All API responses follow a standard JSON format with status and messages.
+
+
+
+### Contribution
 
 Feel free to contribute to this project by creating issues or submitting pull requests.
 
-License
+### License
 
 This project is licensed under the MIT License.
 
