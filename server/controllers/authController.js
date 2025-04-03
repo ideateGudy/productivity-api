@@ -81,17 +81,9 @@ const createToken = (user) => {
 };
 
 const registerUser = async (req, res) => {
-  const { username, email, password, confirmPassword } = req.body;
+  const { username, email, password } = req.body;
 
   try {
-    if (password !== confirmPassword) {
-      const response = {
-        status: false,
-        message: `Password and Confirm Password do not match`,
-      };
-      return res.status(400).send(response);
-    }
-
     const user = await User.create({ username, email, password });
 
     const token = createToken(user);
