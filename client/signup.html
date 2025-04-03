@@ -1,52 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Signup - Productivity App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="flex items-center justify-center h-screen bg-gray-100">
+  </head>
+  <body class="flex items-center justify-center h-screen bg-gray-100">
+    <form class="bg-white p-6 rounded-lg shadow-md w-96">
+      <h2 class="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+      <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        class="w-full p-3 border mb-4 rounded"
+      />
+      <div id="username-error" class="text-red-500 text-sm hidden"></div>
+      <!-- Error message for email -->
 
-    <div class="bg-white p-6 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold mb-4 text-center">Sign Up</h2>
-        <input type="email" id="email" placeholder="Email" class="w-full p-3 border mb-4 rounded">
-        <input type="password" id="password" placeholder="Password" class="w-full p-3 border mb-4 rounded">
-        <input type="password" id="confirmPassword" placeholder="Confirm Password" class="w-full p-3 border mb-4 rounded">
-        <button id="signupBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600">
-            Sign Up
-        </button>
-        <p class="text-center mt-4">Already have an account? <a href="login.html" class="text-blue-500">Login</a></p>
-    </div>
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        class="w-full p-3 border mb-4 rounded"
+      />
+      <div id="email-error" class="text-red-500 text-sm hidden"></div>
+      <!-- Error message for password -->
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        class="w-full p-3 border mb-4 rounded"
+      />
+      <div id="password-error" class="text-red-500 text-sm hidden"></div>
 
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Confirm Password"
+        class="w-full p-3 border mb-4 rounded"
+      />
+      <div id="confirmPassword-error" class="text-red-500 text-sm hidden"></div>
+      <!-- Error message for confirmPassword -->
+      <button
+        type="submit"
+        id="signupBtn"
+        class="bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600"
+      >
+        Sign Up
+      </button>
+      <p class="text-center mt-4">
+        Already have an account?
+        <a href="login.html" class="text-blue-500">Login</a>
+      </p>
+    </form>
 
-    
     <script>
-        document.getElementById("signupBtn").addEventListener("click", () => {
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const confirmPassword = document.getElementById("confirmPassword").value.trim();
+      document
+        .getElementById("signupBtn")
+        .addEventListener("click", async function (event) {
+          event.preventDefault(); // Prevent form from submitting the traditional way
 
-            if (!email || !password || !confirmPassword) {
-                alert("All fields are required!");
-                return;
+          const username = document.getElementById("username").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          // Reset all error messages
+          resetErrors();
+
+          // Check if passwords match
+          //   if (password !== confirmPassword) {
+          //     alert("Passwords do not match");
+          //     return;
+          //   }
+          //   console.log("password", password, confirmPassword);
+
+          const userData = { username, email, password, confirmPassword };
+
+          try {
+            const response = await fetch(
+              "http://localhost:3000/v1/api/auth/register",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json", // Ensure the server knows we're sending JSON
+                },
+                body: JSON.stringify(userData), // Send the form data as JSON
+              }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Success response from the server
+              console.log("Registration successful:", data);
+              alert("User registered successfully!");
+              window.location.href = "login.html"; // Redirect to login page
+            } else {
+              // Error response from the server
+
+              handleServerErrors(data.errors);
             }
-
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return;
-            }
-
-            if (localStorage.getItem(email)) {
-                alert("An account with this email already exists!");
-                return;
-            }
-
-            localStorage.setItem(email, JSON.stringify({ password, tasks: [] })); // Store empty task list for the user
-            alert("Signup successful! You can now log in.");
-            window.location.href = "login.html";
+          } catch (error) {
+            console.error("Error during signup:", error);
+            console.log(error);
+            showError(error);
+          }
         });
-    </script>
 
-</body>
+      // Function to handle server error messages and display them
+      function handleServerErrors(errors) {
+        if (errors) {
+          // Loop through the errors and display them under the relevant input
+          for (const field in errors) {
+            if (errors.hasOwnProperty(field)) {
+              showError(`${field}-error`, errors[field]); // Show error for specific field
+            }
+          }
+        }
+      }
+
+      // Function to show error message for a specific field
+      function showError(inputId, message) {
+        const errorDiv = document.getElementById(inputId);
+        errorDiv.textContent = message; // Set the error message
+        errorDiv.classList.remove("hidden"); // Show the error div
+      }
+
+      // Function to reset all error messages
+      function resetErrors() {
+        const errorDivs = document.querySelectorAll(".text-red-500");
+        errorDivs.forEach((div) => {
+          div.classList.add("hidden");
+        });
+      }
+
+      // document.getElementById("signupBtn").addEventListener("click", () => {
+      // const email = document.getElementById("email").value.trim();
+      // const password = document.getElementById("password").value.trim();
+      // const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+      // if (!email || !password || !confirmPassword) {
+      //     alert("All fields are required!");
+      //     return;
+      // }
+
+      // if (password !== confirmPassword) {
+      //     alert("Passwords do not match!");
+      //     return;
+      // }
+
+      // if (localStorage.getItem(email)) {
+      //     alert("An account with this email already exists!");
+      //     return;
+      // }
+
+      // localStorage.setItem(email, JSON.stringify({ password, tasks: [] })); // Store empty task list for the user
+      // alert("Signup successful! You can now log in.");
+      // window.location.href = "login.html";
+      // }
+      // );
+    </script>
+  </body>
 </html>

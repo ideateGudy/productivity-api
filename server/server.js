@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/connectDB.js";
 import authMiddleware from "./middlewares/authMiddleware.js";
@@ -13,6 +14,9 @@ connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
+// app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+//allow all origins
+app.use(cors({ origin: "*", credentials: true }));
 app.use("/v1/api/auth", authRoutes, authMiddleware, tasksRoutes, notesRoutes);
 // app.use("/api/auth", tasksRoutes);
 
